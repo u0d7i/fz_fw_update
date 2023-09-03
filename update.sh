@@ -27,7 +27,7 @@ usage(){
 	echo "usage: ${MYNAME} [options] [command]"
 	echo "  commands:"
 	echo "    check  - check for update"
-	echo "    update - update firmware to latest"
+	echo "    update - update firmware"
 	echo "    list   - list devices"
 	echo "    cli    - open interactive cli"
 	echo "  options:"

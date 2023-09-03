@@ -6,7 +6,7 @@ Flipper Zero firmware update script
 usage: update.sh [options] [command]
   commands:
     check  - check for update
-    update - update firmware to latest
+    update - update firmware
     list   - list devices
     cli    - open interactive cli
   options:
