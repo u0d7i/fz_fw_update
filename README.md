@@ -2,6 +2,8 @@
 
 Flipper Zero firmware update script (targeting [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware))
 
+gnu/linux specific
+
 ```
 usage: update.sh [options] [command]
   commands:
