@@ -80,11 +80,11 @@ get_release_info(){
 	# dirname
 	DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
 
-	echo "+ latest: ${RN}"
-	echo "+ date:   $(date -d ${RD} +%F\ %T) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
-	echo "+ url:    ${DL}"
-	echo "+ file:   ${FN}"
-	echo "+ dir:    ${DN}"
+	echo "+ release: ${RN}"
+	echo "+ date:    $(date -d ${RD} +%F\ %T) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
+	echo "+ url:     ${DL}"
+	echo "+ file:    ${FN}"
+	echo "+ dir:     ${DN}"
 
 	# safeguard for forced dir removal in clenup
 	if [[ "${DN}" == "" ]]; then
