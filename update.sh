@@ -49,7 +49,7 @@ gear(){
 	done
 }
 
-# use pythion scripts from firmware, untill storage functions implenemted in bash
+# use python scripts from firmware, until storage functions implenemted in bash
 get_scripts(){
 	if [[ ! -d scripts ]]; then
 		echo "- scripts dir not found, getting it..."
