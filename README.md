@@ -1,6 +1,6 @@
 # fz_fw_update
 
-Flipper Zero firmware update script
+Flipper Zero firmware update script (targeting [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware))
 
 ```
 usage: update.sh [options] [command]
