@@ -64,7 +64,7 @@ get_scripts(){
 }
 
 get_release_info(){
-	echo "+ getting latest release info..."
+	echo "+ getting release info..."
 	# latest release info
 	LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
 	# latest release name
