@@ -124,13 +124,14 @@ get_device_fw_version(){
 	DV=$(echo "info device" | socat - "${FZ_DEV},${SP}" | grep firmware.version | awk -F: '{print $2}' | tr -d ' ')
 	echo "+ on-device version: ${DV}"
 	if [[ ("${DV}" == "${RV}") && ("${FORCE}" != "1") ]]; then
-		echo "- on-device version matches latest firmware (will skip update unless forced)."
+		echo "- on-device version matches firmware (will skip update unless forced)."
 		exit
 	fi
 }
 
 do_update(){
-	UP=$(python3 ./scripts/storage.py read /ext/update/${DN}/update.fuf | grep ^Info: | cut -d' ' -f2)
+	get_scripts
+	UP=$(python3 ./scripts/storage.py -p "${FZ_DEV}" read /ext/update/${DN}/update.fuf | grep ^Info: | cut -d' ' -f2)
 	if [[ ("${UP}" == "${RV}") && ("${FORCE}" != "1")  ]]; then
 		echo "- ${UP} update is found on device, skipping."
 	else
@@ -143,7 +144,7 @@ do_update(){
 		echo "+ extracting..."
 		tar -xf $FN
 		echo "+ uploading to device..."
-		python3 ./scripts/storage.py send "${DN}" "/ext/update/${DN}"
+		python3 ./scripts/storage.py -p "${FZ_DEV}" send "${DN}" "/ext/update/${DN}"
 	fi
 	echo "+ cleanup..."
 	rm -rf ./${DN}
