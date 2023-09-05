@@ -29,6 +29,7 @@ usage(){
 	echo "    check  - check for update"
 	echo "    update - update firmware"
 	echo "    list   - list devices"
+	echo "    rel    - list available releases"
 	echo "    cli    - open interactive cli"
 	echo "  options:"
 	echo "    -f            - force update"
@@ -63,13 +64,18 @@ get_scripts(){
 	fi
 }
 
+get_releases(){
+	echo "+ getting available releases..."
+	curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases | jq -r '.[] | .name + " " + .published_at'
+}
+
 get_release_info(){
 	echo "+ getting release info..."
-	# latest release info
+	# release info
 	LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
-	# latest release name
+	# release name
 	RN=$(echo "${LR}" | jq -r '.name')
-	# latest release date
+	# release date
 	RD=$(echo "${LR}" | jq -r '.published_at')
 	# release variant
 	RV="${RN}${VARIANT}"
@@ -197,6 +203,9 @@ case $1 in
 		;;
 	list)
 		get_device
+		;;
+	rel)
+		get_releases
 		;;
 	cli)
 		gear
