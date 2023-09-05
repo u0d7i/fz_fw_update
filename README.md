@@ -5,11 +5,13 @@ Flipper Zero firmware update script (targeting [Unleashed Firmware](https://gith
 gnu/linux specific
 
 ```
+update.sh - Flipper Zero firmware update script
 usage: update.sh [options] [command]
   commands:
     check  - check for update
     update - update firmware
     list   - list devices
+    rel    - list available releases
     cli    - open interactive cli
   options:
     -f            - force update
