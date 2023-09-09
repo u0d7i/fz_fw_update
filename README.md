@@ -8,15 +8,15 @@ gnu/linux specific
 update.sh - Flipper Zero firmware update script
 usage: update.sh [options] [command]
   commands:
-    check  - check for update
-    update - update firmware
-    list   - list devices
-    rel    - list available releases
-    cli    - open interactive cli
+    check          - check for update
+    update         - update firmware
+    install <file> - install from local file
+    list           - list devices
+    rel            - list available releases
+    cli            - open interactive cli
   options:
     -f            - force update
     -d <device>   - specify flipper device manually (default - auto)
     -v <variant>  - release variant (default - "e")
-    -F <firmware> - firmware (default "DarkFlippers/unleashed-firmware")
     -r <release>  - firmware release (default - latest)
 ```
