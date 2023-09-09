@@ -26,11 +26,12 @@ usage(){
 	echo "${MYNAME} - Flipper Zero firmware update script"
 	echo "usage: ${MYNAME} [options] [command]"
 	echo "  commands:"
-	echo "    check  - check for update"
-	echo "    update - update firmware"
-	echo "    list   - list devices"
-	echo "    rel    - list available releases"
-	echo "    cli    - open interactive cli"
+	echo "    check          - check for update"
+	echo "    update         - update firmware"
+	echo "    install <file> - install from local file"
+	echo "    list           - list devices"
+	echo "    rel            - list available releases"
+	echo "    cli            - open interactive cli"
 	echo "  options:"
 	echo "    -f            - force update"
 	echo "    -d <device>   - specify flipper device manually (default - auto)"
@@ -128,6 +129,12 @@ get_device_fw_version(){
 	fi
 }
 
+device_update(){
+	echo "+ running update on device..."
+	echo "update install /ext/update/${DN}/update.fuf" | socat - "${FZ_DEV},${SP}"
+	echo "+ DONE"
+}
+
 do_update(){
 	get_scripts
 	UP=$(python3 ./scripts/storage.py -p "${FZ_DEV}" read /ext/update/${DN}/update.fuf | grep ^Info: | cut -d' ' -f2)
@@ -148,9 +155,35 @@ do_update(){
 	echo "+ cleanup..."
 	rm -rf ./${DN}
 
-	echo "+ running update on device..."
-	echo "update install /ext/update/${DN}/update.fuf" | socat - "${FZ_DEV},${SP}"
-	echo "+ DONE"
+	device_update
+}
+
+do_install(){
+	FN=$1
+	echo "+ installing from local file ${FN}"
+	if [[ "${FN}" == "" ]]; then
+		echo "- please provide file path."
+		usage
+	fi
+	if [[ ! -e "${FN}" ]]; then
+		echo "- file not found."
+		exit 1
+	fi
+	DN=$(tar -tf ${FN} | grep update.fuf | cut -d/ -f1)
+	if [[ "${DN}" == "" ]]; then
+		echo "- no update found in a file"
+		exit 1
+	fi
+	echo "+ found update.fuf inside, extracting"
+	tar -xf $FN
+	echo "+ $(grep ^Info: ${DN}/update.fuf)"
+
+	get_scripts
+	echo "+ uploading to device..."
+	python3 ./scripts/storage.py -p "${FZ_DEV}" send "${DN}" "/ext/update/${DN}"
+	device_update
+	echo "+ cleanup..."
+	rm -rf ./${DN}
 }
 
 cli(){
@@ -197,6 +230,11 @@ case $1 in
 		get_device
 		get_device_fw_version
 		do_update
+		;;
+	install)
+		gear
+		get_device
+		do_install "$2"
 		;;
 	list)
 		get_device
