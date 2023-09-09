@@ -35,7 +35,6 @@ usage(){
 	echo "    -f            - force update"
 	echo "    -d <device>   - specify flipper device manually (default - auto)"
 	echo "    -v <variant>  - release variant (default - \"e\")"
-	echo "    -F <firmware> - firmware (default \"DarkFlippers/unleashed-firmware\")"
 	echo "    -r <release>  - firmware release (default - latest)"
 	exit
 }
@@ -160,7 +159,7 @@ cli(){
 }
 
 # getopts
-while getopts ":fd:v:F:r:" opt; do
+while getopts ":fd:v:r:" opt; do
 	case $opt in
 		f)
 			FORCE=1		
@@ -171,9 +170,6 @@ while getopts ":fd:v:F:r:" opt; do
                 v)
                         VARIANT=${OPTARG}
                         ;;
-		F)
-			FW=${OPTARG}
-			;;
 		r)
 			REL=${OPTARG}
 			;;
