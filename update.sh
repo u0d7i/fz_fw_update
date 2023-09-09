@@ -181,9 +181,10 @@ do_install(){
 	get_scripts
 	echo "+ uploading to device..."
 	python3 ./scripts/storage.py -p "${FZ_DEV}" send "${DN}" "/ext/update/${DN}"
-	device_update
 	echo "+ cleanup..."
 	rm -rf ./${DN}
+
+	device_update
 }
 
 cli(){
