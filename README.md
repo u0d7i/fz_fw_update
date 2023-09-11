@@ -19,4 +19,5 @@ usage: update.sh [options] [command]
     -d <device>   - specify flipper device manually (default - auto)
     -v <variant>  - release variant (default - "e")
     -r <release>  - firmware release (default - latest)
+    -D            - latest development build
 ```
