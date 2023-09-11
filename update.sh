@@ -120,7 +120,7 @@ get_release_info(){
 	fi
 
 	echo "+ release: ${RN}"
-	echo "+ date:    $(date -d ${RD} +%F\ %T) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
+	echo "+ date:    $(date -d ${RD} +%F) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
 	echo "+ url:     ${DL}"
 	echo "+ file:    ${FN}"
 
