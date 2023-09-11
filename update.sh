@@ -8,6 +8,8 @@ set -e
 FW="DarkFlippers/unleashed-firmware"
 # release
 REL="latest"
+# development build data
+DD="https://up.unleashedflip.com/directory.json"
 
 # firmware variant:
 # ""  - 3 custom animations, and default apps preinstalled (base pack)
@@ -17,6 +19,7 @@ REL="latest"
 # "r" - RGB patch (+ extra apps) for flippers with rgb hw backlight mod
 VARIANT="e"
 FORCE=0
+DEVBUILD=0
 
 # socat params
 SP="crnl,raw,echo=0,b115200"
@@ -37,6 +40,7 @@ usage(){
 	echo "    -d <device>   - specify flipper device manually (default - auto)"
 	echo "    -v <variant>  - release variant (default - \"e\")"
 	echo "    -r <release>  - firmware release (default - latest)"
+	echo "    -D            - latest development build"
 	exit
 }
 
@@ -66,31 +70,59 @@ get_scripts(){
 
 get_releases(){
 	echo "+ getting available releases..."
-	curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases | jq -r '.[] | .name + " " + .published_at'
+	if [[ ${DEVBUILD} == "0" ]]; then
+		curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases | jq -r '.[] | .name + " " + .published_at'
+	else
+		echo "+ for dev build..."
+		DJS=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="full_json") | .url')
+		curl -s "$DJS" | jq -r '.firmware_version + " " + .firmware_build_date'
+	fi
 }
 
 get_release_info(){
 	echo "+ getting release info..."
-	# release info
-	LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
-	# release name
-	RN=$(echo "${LR}" | jq -r '.name')
-	# release date
-	RD=$(echo "${LR}" | jq -r '.published_at')
-	# release variant
-	RV="${RN}${VARIANT}"
-	# download url
-	DL=$(echo "${LR}" | jq -r '.assets[] | .browser_download_url' | grep "${RV}.tgz$")
-	# filename
-	FN=$(echo ${DL} | awk -F/ '{print $NF}')
-	# dirname
-	DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
+	if [[ "${DEVBUILD}" == "0" ]]; then
+		# release info
+		LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
+		# release name
+		RN=$(echo "${LR}" | jq -r '.name')
+		# release date
+		RD=$(echo "${LR}" | jq -r '.published_at')
+		# release variant
+		RV="${RN}${VARIANT}"
+		# download url
+		DL=$(echo "${LR}" | jq -r '.assets[] | .browser_download_url' | grep "${RV}.tgz$")
+		# filename
+		FN=$(echo ${DL} | awk -F/ '{print $NF}')
+		# dirname
+		DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
+	else
+		echo "+ for dev build..."
+		DJS=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="full_json") | .url')
+		# release info
+		LR=$(curl -s "$DJS")
+		# release name
+		RN=$(echo "${LR}" | jq -r '.firmware_version')
+		# release variant
+		RV="${RN}${VARIANT}"
+		# release date
+                RD=$(echo "${LR}" | jq -r '.firmware_build_date')
+		RD=$(echo "$RD" | awk -F- '{print $3 "-" $2 "-" $1}')
+		# download url
+                DL=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="update_tgz") | .url')
+		if [[ "${VARIANT}" != "" ]]; then
+			DL=$(echo "${DL}" | sed -e "s/${RN}.tgz$/${RV}.tgz/" -e 's/\/fw\/dev\//\/fw_extra_apps\//')
+		fi
+		FN=$(echo ${DL} | awk -F/ '{print $NF}')
+                # dirname
+                DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
+
+	fi
 
 	echo "+ release: ${RN}"
 	echo "+ date:    $(date -d ${RD} +%F\ %T) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
 	echo "+ url:     ${DL}"
 	echo "+ file:    ${FN}"
-	echo "+ dir:     ${DN}"
 
 	# safeguard for forced dir removal in clenup
 	if [[ "${DN}" == "" ]]; then
@@ -193,7 +225,7 @@ cli(){
 }
 
 # getopts
-while getopts ":fd:v:r:" opt; do
+while getopts ":fd:v:r:D" opt; do
 	case $opt in
 		f)
 			FORCE=1		
@@ -206,6 +238,9 @@ while getopts ":fd:v:r:" opt; do
                         ;;
 		r)
 			REL=${OPTARG}
+			;;
+		D)
+			DEVBUILD=1
 			;;
 		*)
 			usage
