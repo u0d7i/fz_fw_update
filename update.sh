@@ -83,7 +83,12 @@ get_release_info(){
 	echo "+ getting release info..."
 	if [[ "${DEVBUILD}" == "0" ]]; then
 		# release info
-		LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
+		if [[ "${REL}" == "latest" ]]; then
+			LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases/${REL})
+		else
+			LR=$(curl --fail --silent --show-error https://api.github.com/repos/${FW}/releases | jq -r ".[] | select(.name==\"${REL}\") | .url")
+			LR=$(curl --fail --silent --show-error ${LR})
+		fi
 		# release name
 		RN=$(echo "${LR}" | jq -r '.name')
 		# release date
@@ -98,11 +103,16 @@ get_release_info(){
 		DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
 	else
 		echo "+ for dev build..."
+		if [[ "${REL}" != "latest" ]]; then
+			echo "- not latest, need to guess, will do it later some day"
+			exit
+		fi
 		DJS=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="full_json") | .url')
 		# release info
 		LR=$(curl -s "$DJS")
 		# release name
 		RN=$(echo "${LR}" | jq -r '.firmware_version')
+		RD=$(echo "${LR}" | jq -r '.firmware_build_date')
 		# release variant
 		RV="${RN}${VARIANT}"
 		# release date
