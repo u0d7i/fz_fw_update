@@ -97,40 +97,48 @@ get_release_info(){
 		RV="${RN}${VARIANT}"
 		# download url
 		DL=$(echo "${LR}" | jq -r '.assets[] | .browser_download_url' | grep "${RV}.tgz$")
-		# filename
-		FN=$(echo ${DL} | awk -F/ '{print $NF}')
-		# dirname
-		DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
 	else
 		echo "+ for dev build..."
-		if [[ "${REL}" != "latest" ]]; then
-			echo "- not latest, need to guess, will do it later some day"
-			exit
+		if [[ "${REL}" == "latest" ]]; then
+			# parse actuall data
+			DJS=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="full_json") | .url')
+			# release info
+			LR=$(curl -s "$DJS")
+			# release name
+			RN=$(echo "${LR}" | jq -r '.firmware_version')
+			# release date
+			RD=$(echo "${LR}" | jq -r '.firmware_build_date')
+			RD=$(echo "$RD" | awk -F- '{print $3 "-" $2 "-" $1}')
+			# download url
+			DL=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="update_tgz") | .url')
+
+		else
+			#guess
+			echo "+ not latest, pure guess below..."
+			RN="${REL}"
+			DL="https://unleashedflip.com/fw/dev/flipper-z-f7-update-${RN}.tgz"
+
 		fi
-		DJS=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="full_json") | .url')
-		# release info
-		LR=$(curl -s "$DJS")
-		# release name
-		RN=$(echo "${LR}" | jq -r '.firmware_version')
-		RD=$(echo "${LR}" | jq -r '.firmware_build_date')
 		# release variant
 		RV="${RN}${VARIANT}"
-		# release date
-                RD=$(echo "${LR}" | jq -r '.firmware_build_date')
-		RD=$(echo "$RD" | awk -F- '{print $3 "-" $2 "-" $1}')
-		# download url
-                DL=$(curl -s "${DD}" | jq -r '.channels[] | select(.id=="development") | .versions[].files[] | select(.type=="update_tgz") | .url')
 		if [[ "${VARIANT}" != "" ]]; then
 			DL=$(echo "${DL}" | sed -e "s/${RN}.tgz$/${RV}.tgz/" -e 's/\/fw\/dev\//\/fw_extra_apps\//')
 		fi
-		FN=$(echo ${DL} | awk -F/ '{print $NF}')
-                # dirname
-                DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
+	fi
+	# filename
+	FN=$(echo ${DL} | awk -F/ '{print $NF}')
+	# dirname
+	DN=$(echo ${FN} | sed -e 's/^flipper-z-//' -e 's/.tgz$//')
 
+	# parse release date
+	if [[ ${RD} != "" ]]; then
+		RD="$(date -d ${RD} +%F) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
+	else
+		RD="N/A"
 	fi
 
 	echo "+ release: ${RN}"
-	echo "+ date:    $(date -d ${RD} +%F) ($(( ($(date +%s) - $(date -d ${RD} +%s)) / 86400 ))d. ago)"
+	echo "+ date:    ${RD}"
 	echo "+ url:     ${DL}"
 	echo "+ file:    ${FN}"
 
