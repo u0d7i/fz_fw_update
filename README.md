@@ -10,7 +10,7 @@ usage: update.sh [options] [command]
   commands:
     check          - check for update
     update         - update firmware
-    install <file> - install from local file
+    install <file> - install from local file (implies "force")
     list           - list devices
     rel            - list available releases
     cli            - open interactive cli

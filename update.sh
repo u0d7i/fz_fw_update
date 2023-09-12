@@ -31,7 +31,7 @@ usage(){
 	echo "  commands:"
 	echo "    check          - check for update"
 	echo "    update         - update firmware"
-	echo "    install <file> - install from local file"
+	echo "    install <file> - install from local file (implies \"force\")"
 	echo "    list           - list devices"
 	echo "    rel            - list available releases"
 	echo "    cli            - open interactive cli"
