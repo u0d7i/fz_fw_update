@@ -46,7 +46,7 @@ usage(){
 
 #check for the gear
 gear(){
-	for tool in awk curl jq socat python3 ; do
+	for tool in awk curl jq socat python3 unzip; do
 		if [[ -z  "$(command -v ${tool})" ]]; then
 			echo "-err: ${tool} not found"
 			exit 1
